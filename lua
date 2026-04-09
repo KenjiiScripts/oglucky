@@ -46,7 +46,7 @@ title.BackgroundTransparency = 1
 title.Font               = Enum.Font.GothamBold
 title.Text               = "OG BLOCK"
 title.TextColor3         = Color3.fromRGB(255, 221, 85)
-title.TextSize           = 20
+title.TextSize           = 15
 title.TextStrokeTransparency = 0.75
 title.TextStrokeColor3   = Color3.new(0,0,0)
 title.Parent = titleBar
@@ -60,7 +60,7 @@ btn.BackgroundColor3 = Color3.fromRGB(255, 190, 40)
 btn.TextColor3       = Color3.fromRGB(22, 22, 26)
 btn.Font             = Enum.Font.GothamBlack
 btn.Text             = "OG BLOCK"
-btn.TextSize         = 26
+btn.TextSize         = 15
 btn.AutoButtonColor  = false
 btn.Parent = main
 
