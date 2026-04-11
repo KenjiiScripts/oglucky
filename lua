@@ -1,185 +1,249 @@
-local Player = game:GetService("Players").LocalPlayer
-local TweenService = game:GetService("TweenService")
+--// LocalScript → StarterPlayerScripts
+-- OG Block Visual Script (changes "Secret" Lucky Blocks to look like "OG")
+
+local Players          = game:GetService("Players")
+local StarterGui       = game:GetService("StarterGui")
+local TweenService     = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
--- UI erstellen
-local Gui = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 280, 0, 180)
-Main.Position = UDim2.new(0.5, -140, 0.5, -90)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Main.BackgroundTransparency = 0.25
-Main.BorderSizePixel = 0
-Main.Active = true
+local player    = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Abgerundete Ecken
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 14)
-Corner.Parent = Main
+-- Create ScreenGui + UI
+local sg = Instance.new("ScreenGui")
+sg.Name = "OGBlockUI"
+sg.ResetOnSpawn = false
+sg.Parent = playerGui
 
--- Schatten um das UI
-local Shadow = Instance.new("ImageLabel")
-Shadow.Size = UDim2.new(1, 24, 1, 24)
-Shadow.Position = UDim2.new(0, -12, 0, -12)
-Shadow.BackgroundTransparency = 1
-Shadow.Image = "rbxassetid://1286757860"
-Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-Shadow.ImageTransparency = 0.8
-Shadow.ScaleType = Enum.ScaleType.Slice
-Shadow.SliceCenter = Rect.new(49, 49, 450, 450)
-Shadow.Parent = Main
+local main = Instance.new("Frame")
+main.Size       = UDim2.new(0, 220, 0, 150)
+main.Position   = UDim2.new(0.5, -110, 0.5, -75)
+main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+main.BorderSizePixel = 0
+main.ClipsDescendants = true
+main.Parent = sg
 
--- Blur Effekt für den Inhalt hinter dem UI
-local BlurEffect = Instance.new("BlurEffect")
-BlurEffect.Size = 6
-BlurEffect.Parent = game:GetService("Lighting")
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = main
 
--- Titel
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -20, 0, 40)
-Title.Position = UDim2.new(0, 10, 0, 5)
-Title.BackgroundTransparency = 1
-Title.Text = "💸 OG LUCKY BLOCK 💸"
-Title.TextColor3 = Color3.fromRGB(239, 191, 4)
-Title.TextSize = 18
-Title.Font = Enum.Font.GothamBold
-Title.TextYAlignment = Enum.TextYAlignment.Center
-Title.Parent = Main
+local stroke = Instance.new("UIStroke")
+stroke.Color      = Color3.fromRGB(255, 221, 85)
+stroke.Thickness  = 2
+stroke.Transparency = 0.45
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = main
 
--- Start Button
-local StartBtn = Instance.new("TextButton")
-StartBtn.Size = UDim2.new(1, -30, 0, 30)
-StartBtn.Position = UDim2.new(0, 15, 0, 55)
-StartBtn.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
-StartBtn.BackgroundTransparency = 0.2
-StartBtn.Text = "Start OG Lucky Block"
-StartBtn.TextColor3 = Color3.fromRGB(239, 191, 4)
-StartBtn.TextSize = 12
-StartBtn.Font = Enum.Font.GothamBold
-StartBtn.AutoButtonColor = false
+-- Title bar (draggable)
+local titleBar = Instance.new("Frame")
+titleBar.Size               = UDim2.new(1, 0, 0, 34)
+titleBar.BackgroundTransparency = 1
+titleBar.Parent = main
 
-local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(0, 8)
-BtnCorner.Parent = StartBtn
-StartBtn.Parent = Main
+local title = Instance.new("TextLabel")
+title.Size               = UDim2.new(1, 0, 1, 0)
+title.BackgroundTransparency = 1
+title.Font               = Enum.Font.GothamBold
+title.Text               = "💰OG BLOCK SCRIPT"
+title.TextColor3         = Color3.fromRGB(255, 221, 85)
+title.TextSize           = 17
+title.TextStrokeTransparency = 0.75
+title.TextStrokeColor3   = Color3.new(0,0,0)
+title.Parent = titleBar
 
--- Loading Bar
-local LoadBg = Instance.new("Frame")
-LoadBg.Size = UDim2.new(1, -30, 0, 4)
-LoadBg.Position = UDim2.new(0, 15, 0, 95)
-LoadBg.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-LoadBg.BackgroundTransparency = 0.6
-LoadBg.BorderSizePixel = 0
+-- Big Inject Button
+local btn = Instance.new("TextButton")
+btn.Name = "InjectButton"
+btn.Size       = UDim2.new(0.88, 0, 0, 54)
+btn.Position   = UDim2.new(0.06, 0, 0, 62)
+btn.BackgroundColor3 = Color3.fromRGB(255, 190, 40)
+btn.TextColor3       = Color3.fromRGB(22, 22, 26)
+btn.Font             = Enum.Font.GothamBlack
+btn.Text             = "START OG BLOCK"
+btn.TextSize         = 15
+btn.AutoButtonColor  = false
+btn.Parent = main
 
-local LoadBgCorner = Instance.new("UICorner")
-LoadBgCorner.CornerRadius = UDim.new(1, 0)
-LoadBgCorner.Parent = LoadBg
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 9)
+btnCorner.Parent = btn
 
-local LoadBar = Instance.new("Frame")
-LoadBar.Size = UDim2.new(0, 0, 1, 0)
-LoadBar.BackgroundColor3 = Color3.fromRGB(0, 175, 255)
-LoadBar.BackgroundTransparency = 0.3
-LoadBar.BorderSizePixel = 0
-LoadBar.Parent = LoadBg
+local btnStroke = Instance.new("UIStroke")
+btnStroke.Color      = Color3.fromRGB(255, 221, 85)
+btnStroke.Thickness  = 2.5
+btnStroke.Transparency = 0.35
+btnStroke.Parent = btn
 
-local LoadCorner = Instance.new("UICorner")
-LoadCorner.CornerRadius = UDim.new(1, 0)
-LoadCorner.Parent = LoadBar
-LoadBg.Parent = Main
+local UIGrad = Instance.new("UIGradient")
+UIGrad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255,240,140)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,190,40)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(255,240,140)),
+}
+UIGrad.Rotation = 35
+UIGrad.Parent = btn
 
--- Status
-local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -30, 0, 18)
-Status.Position = UDim2.new(0, 15, 0, 103)
-Status.BackgroundTransparency = 1
-Status.Text = "Ready to start..."
-Status.TextColor3 = Color3.fromRGB(239, 191, 4)
-Status.TextSize = 13
-Status.Font = Enum.Font.Gotham
-Status.Parent = Main
+-- Draggable Title Bar
+local dragging, dragStart, startPos
 
--- Auto Block
-local AutoBlock = Instance.new("TextButton")
-AutoBlock.Size = UDim2.new(1, -30, 0, 20)
-AutoBlock.Position = UDim2.new(0, 15, 1, -30)
-AutoBlock.BackgroundTransparency = 1
-AutoBlock.Text = "You Must Have Secret Lucky Block To Work"
-AutoBlock.TextColor3 = Color3.fromRGB(239, 191, 4)
-AutoBlock.TextSize = 12
-AutoBlock.Font = Enum.Font.GothamBold
-AutoBlock.TextXAlignment = Enum.TextXAlignment.Left
-AutoBlock.Parent = Main
-
-Main.Parent = Gui
-Gui.Parent = Player:WaitForChild("PlayerGui")
-
--- Funktionen
-local blockOn = true
-local isRunning = false
-
-StartBtn.MouseButton1Click:Connect(function()
-    if isRunning then return end
-    isRunning = true
+titleBar.InputBegan:Connect(function(input)
+    if not (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then 
+        return 
+    end
     
-    StartBtn.Text = "Starting The OG Block Script..."
-    StartBtn.BackgroundColor3 = Color3.fromRGB(239, 191, 4)
+    dragging   = true
+    dragStart  = input.Position
+    startPos   = main.Position
     
-    spawn(function()
-        local startTime = tick()
-        local duration = 5
-        
-        while tick() - startTime < duration do
-            local progress = (tick() - startTime) / duration
-            LoadBar.Size = UDim2.new(progress, 0, 1, 0)
-            wait(0.03)
+    local conn
+    conn = input.Changed:Connect(function()
+        if input.UserInputState == Enum.UserInputState.End then
+            dragging = false
+            conn:Disconnect()
         end
-        
-        LoadBar.Size = UDim2.new(1, 0, 1, 0)
-        StartBtn.Text = "Loading For OG Block Script..."
-        StartBtn.BackgroundColor3 = Color3.fromRGB(239, 191, 4)
-        Status.Text = "Script is processing be patient..."
     end)
 end)
 
-AutoBlock.MouseButton1Click:Connect(function()
-    blockOn = not blockOn
-    if blockOn then
-        AutoBlock.Text = "Working Any Executor"
-        AutoBlock.TextColor3 = Color3.fromRGB(76, 175, 80)
-    else
-        AutoBlock.Text = "Working Any Executor" 
-        AutoBlock.TextColor3 = Color3.fromRGB(244, 67, 54)
-    end
-end)
-
--- Drag Funktion
-local dragging = false
-local dragStart, startPos
-
-Main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-    end
-end)
-
-Main.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
 UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    if not dragging then return end
+    if not (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then 
+        return 
     end
+    
+    local delta = input.Position - dragStart
+    main.Position = UDim2.new(
+        startPos.X.Scale,   startPos.X.Offset + delta.X,
+        startPos.Y.Scale,   startPos.Y.Offset + delta.Y
+    )
 end)
 
--- Cleanup
-Gui.Destroying:Connect(function()
-    BlurEffect:Destroy()
+-- Button Tween Function
+local function tween(obj, props, time, style)
+    TweenService:Create(obj, TweenInfo.new(time or 0.25, style or Enum.EasingStyle.Quint), props):Play()
+end
+
+-- Button Hover & Click Animations
+btn.MouseEnter:Connect(function()
+    tween(btn,       {BackgroundColor3 = Color3.fromRGB(255, 215, 80)}, 0.25)
+    tween(btnStroke, {Transparency = 0.1}, 0.25)
+    tween(UIGrad,    {Rotation = 70}, 0.8)
 end)
 
-print("Steal A Brainrot UI loaded!")
+btn.MouseLeave:Connect(function()
+    tween(btn,       {BackgroundColor3 = Color3.fromRGB(255, 190, 40)}, 0.25)
+    tween(btnStroke, {Transparency = 0.35}, 0.25)
+    tween(UIGrad,    {Rotation = 35}, 0.8)
+end)
+
+btn.MouseButton1Down:Connect(function()
+    tween(btn, {Size = UDim2.new(0.84, 0, 0, 50)}, 0.11)
+end)
+
+btn.MouseButton1Up:Connect(function()
+    tween(btn, {Size = UDim2.new(0.88, 0, 0, 54)}, 0.2, Enum.EasingStyle.Back)
+end)
+
+-- Notification Helper
+local function notify(text)
+    StarterGui:SetCore("SendNotification", {
+        Title = "OG Block",
+        Text = text,
+        Duration = 5,
+    })
+end
+
+-- Core Logic: Change Secret → OG and $750M → $750B
+local alreadyInjected = false
+
+local function tryMakeOG(block)
+    if not block:IsA("TextLabel") then return false end
+    
+    local parent = block.Parent
+    if not parent then return false end
+    
+    local display = parent:FindFirstChild("DisplayName")
+    if not (display and display:IsA("TextLabel") and display.Text == "Lucky Block") then
+        return false
+    end
+    
+    local changed = false
+
+    if block.Text == "Secret" then
+        block.Text = "OG"
+        block.TextColor3 = Color3.fromRGB(255, 221, 85)
+        
+        if not block:FindFirstChildOfClass("UIStroke") then
+            local st = Instance.new("UIStroke")
+            st.Color = Color3.new(0,0,0)
+            st.Thickness = 2
+            st.Parent = block
+        end
+        
+        local grad = block:FindFirstChildOfClass("UIGradient")
+        if grad then
+            grad.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0,   Color3.fromRGB(255,235,120)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,190,50)),
+                ColorSequenceKeypoint.new(1,   Color3.fromRGB(255,235,120)),
+            }
+        end
+        
+        changed = true
+        
+    elseif block.Text == "$750M" then
+        block.Text = "$750B"
+        changed = true
+    end
+    
+    return changed
+end
+
+local function injectNow()
+    if alreadyInjected then
+        notify("Already injected!")
+        return
+    end
+    
+    local count = 0
+    
+    -- Apply to existing blocks
+    for _, v in ipairs(game:GetDescendants()) do
+        if tryMakeOG(v) then
+            count += 1
+        end
+    end
+    
+    -- Listen for new blocks (future spawns)
+    game.DescendantAdded:Connect(function(child)
+        task.spawn(function()
+            if tryMakeOG(child) then
+                count += 1
+            end
+        end)
+    end)
+    
+    alreadyInjected = true
+    
+    if count > 0 then
+        notify("Injected → Upgraded " .. count .. " Secret block(s) to OG")
+    else
+        notify("No Secret Lucky Blocks found right now")
+    end
+end
+
+-- Button Click
+btn.Activated:Connect(function()
+    local oldText = btn.Text
+    btn.Text = "Injecting..."
+    tween(btn, {BackgroundColor3 = Color3.fromRGB(90, 200, 90)}, 0.15)
+    
+    task.delay(0.9, function()
+        injectNow()
+        
+        btn.Text = oldText
+        tween(btn, {BackgroundColor3 = Color3.fromRGB(255, 190, 40)}, 0.35)
+    end)
+end)
+
+-- Initial Notification
+notify("UI Loaded • Drag from title bar • Click button to activate OG blocks")
